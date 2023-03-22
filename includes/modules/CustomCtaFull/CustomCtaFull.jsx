@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 
 class CustomCtaFull extends Component {
 
-  static slug = 'dicm_cta_vb';
+  static slug = 'ism_cta_vb';
 
   _renderButton() {
     const props              = this.props;
@@ -37,7 +37,7 @@ class CustomCtaFull extends Component {
 
   /**
    * Module render in VB
-   * Basically DICM_CTA_Has_VB_Support->render() equivalent in JSX
+   * Basically ISM_CTA_Has_VB_Support->render() equivalent in JSX
    */
   render() {
     return (

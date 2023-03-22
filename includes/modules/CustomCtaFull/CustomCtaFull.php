@@ -6,9 +6,9 @@
  *
  * @since 1.0.0
  */
-class DICM_CTA_Has_VB_Support extends ET_Builder_Module {
+class ISM_CTA_Has_VB_Support extends ET_Builder_Module {
 	// Module slug (also used as shortcode tag)
-	public $slug       = 'dicm_cta_vb';
+	public $slug       = 'ism_cta_vb';
 
 	// Visual Builder support (off|partial|on)
 	public $vb_support = 'on';
@@ -20,19 +20,19 @@ class DICM_CTA_Has_VB_Support extends ET_Builder_Module {
 	 */
 	function init() {
 		// Module name
-		$this->name             = esc_html__( 'Custom CTA VB', 'dicm-divi-custom-modules' );
+		$this->name             = esc_html__( 'Custom CTA VB', 'ism-ideasci-modules' );
 
 		// Module Icon
 		// Load customized svg icon and use it on builder as module icon. If you don't have svg icon, you can use
-		// $this->icon for using etbuilder font-icon. (See CustomCta / DICM_CTA class)
+		// $this->icon for using etbuilder font-icon. (See CustomCta / ISM_CTA class)
 		$this->icon_path        =  plugin_dir_path( __FILE__ ) . 'icon.svg';
 
 		// Toggle settings
 		$this->settings_modal_toggles  = array(
 			'general'  => array(
 				'toggles' => array(
-					'main_content' => esc_html__( 'Text', 'dicm-divi-custom-modules' ),
-					'button'       => esc_html__( 'Button', 'dicm-divi-custom-modules' ),
+					'main_content' => esc_html__( 'Text', 'ism-ideasci-modules' ),
+					'button'       => esc_html__( 'Button', 'ism-ideasci-modules' ),
 				),
 			),
 		);
@@ -48,45 +48,45 @@ class DICM_CTA_Has_VB_Support extends ET_Builder_Module {
 	function get_fields() {
 		return array(
 			'title' => array(
-				'label'           => esc_html__( 'Title', 'dicm-divi-custom-modules' ),
+				'label'           => esc_html__( 'Title', 'ism-ideasci-modules' ),
 				'type'            => 'text',
 				'option_category' => 'basic_option',
-				'description'     => esc_html__( 'Text entered here will appear as title.', 'dicm-divi-custom-modules' ),
+				'description'     => esc_html__( 'Text entered here will appear as title.', 'ism-ideasci-modules' ),
 				'toggle_slug'     => 'main_content',
 			),
 			'content' => array(
-				'label'           => esc_html__( 'Content', 'dicm-divi-custom-modules' ),
+				'label'           => esc_html__( 'Content', 'ism-ideasci-modules' ),
 				'type'            => 'tiny_mce',
 				'option_category' => 'basic_option',
-				'description'     => esc_html__( 'Content entered here will appear inside the module.', 'dicm-divi-custom-modules' ),
+				'description'     => esc_html__( 'Content entered here will appear inside the module.', 'ism-ideasci-modules' ),
 				'toggle_slug'     => 'main_content',
 			),
 			'button_text' => array(
-				'label'           => esc_html__( 'Button Text', 'dicm-divi-custom-modules' ),
+				'label'           => esc_html__( 'Button Text', 'ism-ideasci-modules' ),
 				'type'            => 'text',
 				'option_category' => 'basic_option',
-				'description'     => esc_html__( 'Input your desired button text, or leave blank for no button.', 'dicm-divi-custom-modules' ),
+				'description'     => esc_html__( 'Input your desired button text, or leave blank for no button.', 'ism-ideasci-modules' ),
 				'toggle_slug'     => 'button',
 			),
 			'button_url' => array(
-				'label'           => esc_html__( 'Button URL', 'dicm-divi-custom-modules' ),
+				'label'           => esc_html__( 'Button URL', 'ism-ideasci-modules' ),
 				'type'            => 'text',
 				'option_category' => 'basic_option',
-				'description'     => esc_html__( 'Input URL for your button.', 'dicm-divi-custom-modules' ),
+				'description'     => esc_html__( 'Input URL for your button.', 'ism-ideasci-modules' ),
 				'toggle_slug'     => 'button',
 			),
 			'button_url_new_window' => array(
 				'default'         => 'off',
 				'default_on_front'=> true,
-				'label'           => esc_html__( 'Url Opens', 'dicm-divi-custom-modules' ),
+				'label'           => esc_html__( 'Url Opens', 'ism-ideasci-modules' ),
 				'type'            => 'select',
 				'option_category' => 'configuration',
 				'options'         => array(
-					'off' => esc_html__( 'In The Same Window', 'dicm-divi-custom-modules' ),
-					'on'  => esc_html__( 'In The New Tab', 'dicm-divi-custom-modules' ),
+					'off' => esc_html__( 'In The Same Window', 'ism-ideasci-modules' ),
+					'on'  => esc_html__( 'In The New Tab', 'ism-ideasci-modules' ),
 				),
 				'toggle_slug'     => 'button',
-				'description'     => esc_html__( 'Choose whether your link opens in a new window or not', 'dicm-divi-custom-modules' ),
+				'description'     => esc_html__( 'Choose whether your link opens in a new window or not', 'ism-ideasci-modules' ),
 			),
 		);
 	}
@@ -165,4 +165,4 @@ class DICM_CTA_Has_VB_Support extends ET_Builder_Module {
 	}
 }
 
-new DICM_CTA_Has_VB_Support;
+new ISM_CTA_Has_VB_Support;

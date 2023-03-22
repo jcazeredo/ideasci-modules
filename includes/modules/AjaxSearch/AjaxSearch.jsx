@@ -12,9 +12,11 @@ class AjaxSearch extends Component {
    */
   render() {
     return (
-      <div>
-        <h2 className="ism-title">{this.props.title}</h2>
-        <div className="ism-content">{this.props.content()}</div>
+      <div class="ism-ajax-search">
+        <div class="ism-ajax-search-wrap">
+          <li><a href="link">Title - Date</a></li>
+          <li><a href="link">Title - Date</a></li>
+        </div>
       </div>
     );
   }

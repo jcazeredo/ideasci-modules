@@ -6,9 +6,9 @@
  *
  * @since 1.0.0
  */
-class ISM_CTA_Has_VB_Support extends ET_Builder_Module {
+class ISM_Ajax_Search extends ET_Builder_Module {
 	// Module slug (also used as shortcode tag)
-	public $slug       = 'ism_cta_vb';
+	public $slug       = 'ism_ajax_search';
 
 	// Visual Builder support (off|partial|on)
 	public $vb_support = 'on';
@@ -20,7 +20,7 @@ class ISM_CTA_Has_VB_Support extends ET_Builder_Module {
 	 */
 	function init() {
 		// Module name
-		$this->name             = esc_html__( 'Custom CTA VB', 'ism-ideasci-modules' );
+		$this->name             = esc_html__( 'Idea-sci search', 'ism-ideasci-modules' );
 
 		// Module Icon
 		// Load customized svg icon and use it on builder as module icon. If you don't have svg icon, you can use
@@ -160,9 +160,8 @@ class ISM_CTA_Has_VB_Support extends ET_Builder_Module {
 			%3$s',
 			esc_html( $title ),
 			et_sanitized_previously( $this->content ),
-			et_sanitized_previously( $button )
 		);
 	}
 }
 
-new ISM_CTA_Has_VB_Support;
+new ISM_Ajax_Search;

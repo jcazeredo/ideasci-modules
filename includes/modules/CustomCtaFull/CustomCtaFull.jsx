@@ -42,8 +42,8 @@ class CustomCtaFull extends Component {
   render() {
     return (
       <div>
-        <h2 className="dicm-title">{this.props.title}</h2>
-        <div className="dicm-content">{this.props.content()}</div>
+        <h2 className="ism-title">{this.props.title}</h2>
+        <div className="ism-content">{this.props.content()}</div>
         {this._renderButton()}
       </div>
     );

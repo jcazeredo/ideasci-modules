@@ -32,7 +32,6 @@ class ISM_Ajax_Search extends ET_Builder_Module {
 			'general'  => array(
 				'toggles' => array(
 					'main_content' => esc_html__( 'Text', 'ism-ideasci-modules' ),
-					'button'       => esc_html__( 'Button', 'ism-ideasci-modules' ),
 				),
 			),
 		);
@@ -61,33 +60,6 @@ class ISM_Ajax_Search extends ET_Builder_Module {
 				'description'     => esc_html__( 'Content entered here will appear inside the module.', 'ism-ideasci-modules' ),
 				'toggle_slug'     => 'main_content',
 			),
-			'button_text' => array(
-				'label'           => esc_html__( 'Button Text', 'ism-ideasci-modules' ),
-				'type'            => 'text',
-				'option_category' => 'basic_option',
-				'description'     => esc_html__( 'Input your desired button text, or leave blank for no button.', 'ism-ideasci-modules' ),
-				'toggle_slug'     => 'button',
-			),
-			'button_url' => array(
-				'label'           => esc_html__( 'Button URL', 'ism-ideasci-modules' ),
-				'type'            => 'text',
-				'option_category' => 'basic_option',
-				'description'     => esc_html__( 'Input URL for your button.', 'ism-ideasci-modules' ),
-				'toggle_slug'     => 'button',
-			),
-			'button_url_new_window' => array(
-				'default'         => 'off',
-				'default_on_front'=> true,
-				'label'           => esc_html__( 'Url Opens', 'ism-ideasci-modules' ),
-				'type'            => 'select',
-				'option_category' => 'configuration',
-				'options'         => array(
-					'off' => esc_html__( 'In The Same Window', 'ism-ideasci-modules' ),
-					'on'  => esc_html__( 'In The New Tab', 'ism-ideasci-modules' ),
-				),
-				'toggle_slug'     => 'button',
-				'description'     => esc_html__( 'Choose whether your link opens in a new window or not', 'ism-ideasci-modules' ),
-			),
 		);
 	}
 
@@ -99,24 +71,7 @@ class ISM_Ajax_Search extends ET_Builder_Module {
 	 * @return array
 	 */
 	function get_advanced_fields_config() {
-		return array(
-			'button' => array(
-				'button' => array(
-					'label' => esc_html__( 'Button', 'et_builder' ),
-					'box_shadow'     => array(
-						'css' => array(
-							'main' => '%%order_class%% .et_pb_button',
-						),
-					),
-					'margin_padding' => array(
-						'css' => array(
-							'main'      => "%%order_class%% .et_pb_button",
-							'important' => 'all',
-						),
-					),
-				),
-			),
-		);
+		return array();
 	}
 
 	/**
@@ -133,34 +88,50 @@ class ISM_Ajax_Search extends ET_Builder_Module {
 	function render( $attrs, $content = null, $render_slug ) {
 		// Module specific props added on $this->get_fields()
 		$title                 = $this->props['title'];
-		$button_text           = $this->props['button_text'];
-		$button_url            = $this->props['button_url'];
-		$button_url_new_window = $this->props['button_url_new_window'];
+		
+		$args = array(
+			'post_type' => 'post',
+			'posts_per_page' => -1,
+			'orderby' => 'date',
+			'order' => 'DESC',
+		);
+		
+		$query = new WP_Query($args);
+		
+		$output = '<div class="search-results-wrap">';
+		
+		if ( $query->have_posts() ) {
+			$output .= '<ul>';
+		
+			while ( $query->have_posts() ) {
+				$query->the_post();
+		
+				$output .= '<li>';
+				$output .= '<a href="' . esc_url( get_permalink() ) . '">' . esc_html( get_the_title() ) . '</a>';
+				$output .= ' - ';
+				$output .= esc_html( get_the_date("D, Y") );
+				$output .= '</li>';
+			}
+		
+			$output .= '</ul>';
+		
+			wp_reset_postdata();
+		}
 
-		// These design related props are added via $this->advanced_options['button']['button']
-		$button_custom         = $this->props['custom_button'];
-		$button_rel            = $this->props['button_rel'];
-		$button_icon           = $this->props['button_icon'];
+		$output .= '</div>';
+		
+		wp_reset_postdata();
 
-		// Render button
-		$button = $this->render_button( array(
-			'button_text'      => $button_text,
-			'button_url'       => $button_url,
-			'url_new_window'   => $button_url_new_window,
-			'button_custom'    => $button_custom,
-			'button_rel'       => $button_rel,
-			'custom_icon'      => $button_icon,
-		) );
+		// $search_results = sprintf(
+		// 	'<h2 class="ism-title">%1$s</h2>
+		// 	<div class="ism-content">%2$s</div>',
+		// 	esc_html( $title ),
+		// 	et_sanitized_previously( $this->content ),
+		// );
 
 		// 3rd party module with full VB support doesn't need to manually wrap its module. Divi builder
 		// has automatically wrapped it
-		return sprintf(
-			'<h2 class="ism-title">%1$s</h2>
-			<div class="ism-content">%2$s</div>
-			%3$s',
-			esc_html( $title ),
-			et_sanitized_previously( $this->content ),
-		);
+		return $output;
 	}
 }
 

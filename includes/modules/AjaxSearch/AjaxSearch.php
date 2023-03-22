@@ -7,12 +7,19 @@
  * @since 1.0.0
  */
 class ISM_Ajax_Search extends ET_Builder_Module {
+
 	// Module slug (also used as shortcode tag)
 	public $slug       = 'ism_ajax_search';
 
 	// Visual Builder support (off|partial|on)
 	public $vb_support = 'on';
 
+	protected $module_credits = array(
+		'module_uri' => 'https://github.com/jcazeredo/ideasci-modules',
+		'author'     => 'Idea-sci',
+		'author_uri' => 'https://www.idea-sci.com/',
+	);
+	
 	/**
 	 * Module properties initialization
 	 *
@@ -21,7 +28,8 @@ class ISM_Ajax_Search extends ET_Builder_Module {
 	function init() {
 		// Module name
 		$this->name             = esc_html__( 'Idea-sci search', 'ism-ideasci-modules' );
-
+		$this->main_css_element = '%%order_class%%';
+		
 		// Module Icon
 		// Load customized svg icon and use it on builder as module icon. If you don't have svg icon, you can use
 		// $this->icon for using etbuilder font-icon. (See CustomCta / ISM_CTA class)
@@ -57,8 +65,398 @@ class ISM_Ajax_Search extends ET_Builder_Module {
 					'display' => array(
 						'title' => esc_html__( 'Display', 'ism-ideasci-modules' ),
 					),
+					'scrollbar' => array(
+						'title' => esc_html__( 'Scrollbar', 'divi-plus' ),
+					),
+					'link' => array(
+						'title' => esc_html__( 'Link', 'ism-ideasci-modules' ),
+					),
 				),
 			),
+			'advanced' => array(
+				'toggles' => array(
+					'search_field_settings' => array(
+						'title' => esc_html__( 'Search Field', 'ism-ideasci-modules' ),
+					),
+					'item_settings' => array(
+						'title' => esc_html__( 'Item', 'ism-ideasci-modules' ),
+					),
+					'search_icon_settings' => array(
+						'title' => esc_html__( 'Search Icon', 'ism-ideasci-modules' ),
+					),
+					'loader_settings' => array(
+						'title' => esc_html__( 'Loader', 'ism-ideasci-modules' ),
+					),
+					'search_result_item_text_settings' => array(
+						'title' => esc_html__( 'Search Result Item Text', 'ism-ideasci-modules' ),
+						'sub_toggles'   => array(
+                            'title' => array(
+                                'name' => 'Title',
+                            ),
+							'date' => array(
+                                'name' => 'Date',
+                            ),
+                            'excerpt' => array(
+                                'name' => 'Excerpt',
+                            ),
+                            'price' => array(
+                                'name' => 'Price',
+                            ),
+                        ),
+                        'tabbed_subtoggles' => true,
+					),
+					'featured_image_settings' => array(
+						'title' => esc_html__( 'Featured Image', 'ism-ideasci-modules' ),
+					),
+				),
+			),
+		);
+	}
+
+	/**
+	 * Module's advanced options configuration
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	function get_advanced_fields_config() {
+		return array(
+			'fonts' => array(
+				'search_result_item_title' => array(
+					'label'          => esc_html__( 'Title', 'ism-ideasci-modules' ),
+					'font_size'      => array(
+						'default_on_front' => '16px',
+						'range_settings'   => array(
+							'min'  => '1',
+							'max'  => '100',
+							'step' => '1',
+						),
+						'validate_unit'    => true,
+					),
+					'line_height'    => array(
+						'default_on_front' => '1.2em',
+						'range_settings'   => array(
+							'min'  => '0.1',
+							'max'  => '10',
+							'step' => '0.1',
+						),
+					),
+					'letter_spacing' => array(
+						'default_on_front' => '0px',
+						'range_settings'   => array(
+							'min'  => '0',
+							'max'  => '10',
+							'step' => '1',
+						),
+						'validate_unit'    => true,
+					),
+					'hide_text_align' => true,
+					'css'            => array(
+						'main' => '%%order_class%% .ism_ajax_search_item .ism_ajax_search_item_title',
+					),
+					'tab_slug' => 'advanced',
+					'toggle_slug' => 'search_result_item_text_settings',
+					'sub_toggle' => 'title',
+				),
+				'search_result_item_date' => array(
+					'label'          => esc_html__( 'Date', 'ism-ideasci-modules' ),
+					'font_size'      => array(
+						'default_on_front' => '14px',
+						'range_settings'   => array(
+							'min'  => '1',
+							'max'  => '100',
+							'step' => '1',
+						),
+						'validate_unit'    => true,
+					),
+					'line_height'    => array(
+						'default_on_front' => '1.5em',
+						'range_settings'   => array(
+							'min'  => '0.1',
+							'max'  => '10',
+							'step' => '0.1',
+						),
+					),
+					'letter_spacing' => array(
+						'default_on_front' => '0px',
+						'range_settings'   => array(
+							'min'  => '0',
+							'max'  => '10',
+							'step' => '1',
+						),
+						'validate_unit'    => true,
+					),
+					'hide_text_align' => true,
+					'css'            => array(
+						'main' => '%%order_class%% .ism_ajax_search_item .ism_ajax_search_item_date',
+					),
+					'tab_slug' => 'advanced',
+					'toggle_slug' => 'search_result_item_text_settings',
+					'sub_toggle' => 'date',
+				),
+				'search_result_item_excerpt' => array(
+					'label'          => esc_html__( 'Excerpt', 'ism-ideasci-modules' ),
+					'font_size'      => array(
+						'default_on_front' => '14px',
+						'range_settings'   => array(
+							'min'  => '1',
+							'max'  => '100',
+							'step' => '1',
+						),
+						'validate_unit'    => true,
+					),
+					'line_height'    => array(
+						'default_on_front' => '1.5em',
+						'range_settings'   => array(
+							'min'  => '0.1',
+							'max'  => '10',
+							'step' => '0.1',
+						),
+					),
+					'letter_spacing' => array(
+						'default_on_front' => '0px',
+						'range_settings'   => array(
+							'min'  => '0',
+							'max'  => '10',
+							'step' => '1',
+						),
+						'validate_unit'    => true,
+					),
+					'hide_text_align' => true,
+					'css'            => array(
+						'main' => '%%order_class%% .ism_ajax_search_item .ism_ajax_search_item_excerpt',
+					),
+					'tab_slug' => 'advanced',
+					'toggle_slug' => 'search_result_item_text_settings',
+					'sub_toggle' => 'excerpt',
+				),
+			),
+			'form_field' => array(
+				'form_field' => array(
+					'label' => esc_html__( 'Field', 'ism-ideasci-modules' ),
+					'css' => array(
+						'main' 			=> '%%order_class%% .ism_ajax_search_field',
+						'hover' 		=> '%%order_class%% .ism_ajax_search_field:hover',
+						'focus' 		=> '%%order_class%% .ism_ajax_search_field:focus',
+						'focus_hover' 	=> '%%order_class%% .ism_ajax_search_field:focus:hover',
+					),
+					'font_field' => array(
+						'css' => array(
+							'main' => implode(', ', array(
+								'%%order_class%% .ism_ajax_search_field',
+								'%%order_class%% .ism_ajax_search_field::placeholder',
+								'%%order_class%% .ism_ajax_search_field::-webkit-input-placeholder',
+								'%%order_class%% .ism_ajax_search_field::-ms-input-placeholder',
+								'%%order_class%% .ism_ajax_search_field::-moz-placeholder',
+							) ),
+							'hover' => implode(', ', array(
+								'%%order_class%% .ism_ajax_search_field:',
+								'%%order_class%% .ism_ajax_search_field::placeholder',
+								'%%order_class%% .ism_ajax_search_field::-webkit-input-placeholder',
+								'%%order_class%% .ism_ajax_search_field::-ms-input-placeholder',
+								'%%order_class%% .ism_ajax_search_field::-moz-placeholder',
+							) ),
+							'focus' => implode(', ', array(
+								'%%order_class%% .ism_ajax_search_field',
+								'%%order_class%% .ism_ajax_search_field::placeholder',
+								'%%order_class%% .ism_ajax_search_field::-webkit-input-placeholder',
+								'%%order_class%% .ism_ajax_search_field::-ms-input-placeholder',
+								'%%order_class%% .ism_ajax_search_field::-moz-placeholder',
+							) ),
+							'focus_hover' => implode(', ', array(
+								'%%order_class%% .ism_ajax_search_field',
+								'%%order_class%% .ism_ajax_search_field::placeholder',
+								'%%order_class%% .ism_ajax_search_field::-webkit-input-placeholder',
+								'%%order_class%% .ism_ajax_search_field::-ms-input-placeholder',
+								'%%order_class%% .ism_ajax_search_field::-moz-placeholder',
+							) ),
+							'placeholder' => true,
+						),
+						'line_height'    => array(
+							'default' => '1em',
+						),
+						'font_size'      => array(
+							'default' => '14px',
+						),
+						'letter_spacing' => array(
+							'default' => '0px',
+						),
+					),
+					'margin_padding' => array(
+						'use_margin' => false,
+						'css'        => array(
+							'padding' => '%%order_class%% .ism_ajax_search_field',
+						),
+					),
+					'box_shadow' => false,
+					'border_styles' => array(
+						'form_field' => array(
+							'fields_after' => array(
+								'use_focus_border_color' => false,
+							),
+							'css' => array(
+								'main' => array(
+									'border_radii'  => '%%order_class%% .ism_ajax_search_field',
+									'border_styles' => '%%order_class%% .ism_ajax_search_field',
+								),
+								'important' => 'all',
+							),
+							'labism_prefix' => esc_html__( 'Field', 'ism-ideasci-modules' ),
+						),
+					),
+					'tab_slug' => 'advanced',
+					'toggle_slug' => 'search_field_settings',
+				),
+			),
+			'form_field' => array(
+				'form_field' => array(
+					'label' => esc_html__( 'Field', 'ism-ideasci-modules' ),
+					'css' => array(
+						'main' 			=> '%%order_class%% .ism_ajax_search_item',
+						'hover' 		=> '%%order_class%% .ism_ajax_search_item:hover',
+						'focus' 		=> '%%order_class%% .ism_ajax_search_item:focus',
+						'focus_hover' 	=> '%%order_class%% .ism_ajax_search_item:focus:hover',
+					),
+					'font_field' => array(
+						'css' => array(
+							'main' => implode(', ', array(
+								'%%order_class%% .ism_ajax_search_item',
+								'%%order_class%% .ism_ajax_search_item::placeholder',
+								'%%order_class%% .ism_ajax_search_item::-webkit-input-placeholder',
+								'%%order_class%% .ism_ajax_search_item::-ms-input-placeholder',
+								'%%order_class%% .ism_ajax_search_item::-moz-placeholder',
+							) ),
+							'hover' => implode(', ', array(
+								'%%order_class%% .ism_ajax_search_item:',
+								'%%order_class%% .ism_ajax_search_item::placeholder',
+								'%%order_class%% .ism_ajax_search_item::-webkit-input-placeholder',
+								'%%order_class%% .ism_ajax_search_item::-ms-input-placeholder',
+								'%%order_class%% .ism_ajax_search_item::-moz-placeholder',
+							) ),
+							'focus' => implode(', ', array(
+								'%%order_class%% .ism_ajax_search_item',
+								'%%order_class%% .ism_ajax_search_item::placeholder',
+								'%%order_class%% .ism_ajax_search_item::-webkit-input-placeholder',
+								'%%order_class%% .ism_ajax_search_item::-ms-input-placeholder',
+								'%%order_class%% .ism_ajax_search_item::-moz-placeholder',
+							) ),
+							'focus_hover' => implode(', ', array(
+								'%%order_class%% .ism_ajax_search_item',
+								'%%order_class%% .ism_ajax_search_item::placeholder',
+								'%%order_class%% .ism_ajax_search_item::-webkit-input-placeholder',
+								'%%order_class%% .ism_ajax_search_item::-ms-input-placeholder',
+								'%%order_class%% .ism_ajax_search_item::-moz-placeholder',
+							) ),
+							'placeholder' => true,
+						),
+						'line_height'    => array(
+							'default' => '1em',
+						),
+						'font_size'      => array(
+							'default' => '14px',
+						),
+						'letter_spacing' => array(
+							'default' => '0px',
+						),
+					),
+					'margin_padding' => array(
+						'use_margin' => false,
+						'css'        => array(
+							'padding' => '%%order_class%% .ism_ajax_search_item',
+						),
+					),
+					'box_shadow' => false,
+					'border_styles' => array(
+						'form_field' => array(
+							'fields_after' => array(
+								'use_focus_border_color' => false,
+							),
+							'css' => array(
+								'main' => array(
+									'border_radii'  => '%%order_class%% .ism_ajax_search_item',
+									'border_styles' => '%%order_class%% .ism_ajax_search_item',
+								),
+								'important' => 'all',
+							),
+							'labism_prefix' => esc_html__( 'Field', 'ism-ideasci-modules' ),
+						),
+					),
+					'tab_slug' => 'advanced',
+					'toggle_slug' => 'item_settings',
+				),
+			),
+			'margin_padding' => array(
+				'css' => array(
+					'main'      => '%%order_class%%',
+					'important' => 'all',
+				),
+			),
+			'search_result_margin_padding' => array(
+                'search_result_box' => array(
+                    'margin_padding' => array(
+                        'css' => array(
+                        	'use_margin' => false,
+                            'padding'    => '%%order_class%% .ism_ajax_search_results',
+                            'important'  => 'all',
+                        ),
+                    ),
+                ),
+            ),
+			'max_width' => array(
+				'default' => array(
+					'css' => array(
+						'main'             => '%%order_class%%',
+						'module_alignment' => '%%order_class%%',
+					),
+				),
+			),
+			'height' => array(
+				'default' => array(
+					'css' => array(
+						'main' => '%%order_class%%',
+					),
+				),
+			),
+			'borders' => array(
+				'search_result_box' => array(
+					'labism_prefix' => 'Result Box',
+					'css'          => array(
+						'main' => array(
+							'border_radii'  => '%%order_class%% .ism_ajax_search_results',
+							'border_styles' => '%%order_class%% .ism_ajax_search_results',
+						),
+					),
+					'tab_slug'     => 'advanced',
+					'toggle_slug'  => 'border',
+				),
+				'default' => array(
+					'css' => array(
+						'main' => array(
+							'border_styles' => '%%order_class%%',
+							'border_radii'  => '%%order_class%%',
+						),
+					),
+				),
+			),
+			'box_shadow' => array(
+				'search_result_box' => array(
+					'label'       => esc_html__( 'Result Box Box Shadow', 'ism-ideasci-modules' ),
+					'css'         => array(
+						'main' => '%%order_class%% .ism_ajax_search_results',
+					),
+					'tab_slug'    => 'advanced',
+					'toggle_slug' => 'box_shadow',
+				),
+				'default' => array(
+					'css' => array(
+						'main' => '%%order_class%%',
+					),
+				),
+			),
+			'filters' => false,
+			'text' => false,
+			'link_options'  => false,
 		);
 	}
 
@@ -203,17 +601,6 @@ class ISM_Ajax_Search extends ET_Builder_Module {
 	}
 
 	/**
-	 * Module's advanced options configuration
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return array
-	 */
-	function get_advanced_fields_config() {
-		return array();
-	}
-
-	/**
 	 * Render module output
 	 *
 	 * @since 1.0.0
@@ -245,18 +632,25 @@ class ISM_Ajax_Search extends ET_Builder_Module {
 		
 		$query = new WP_Query($args);
 		
-		$output = '<div class="ism-ajax-search">';
-		$output .= '<div class="ism-ajax-search-wrap">';
-
+		$output = '<div class="ism_ajax_search_wrap">';
+		$output .= '<div class="ism_ajax_search_field_wrap"></div>';
+		$output .= '<div class="ism_ajax_search_results_wrap">';
+		$output .= '<div class="ism_ajax_search_results">';
+		$output .= '<div class="ism_ajax_search_items">';
+		
 		if ( $query->have_posts() ) {
 			
 		
 			while ( $query->have_posts() ) {
 				$query->the_post();
 				
-				$output .= sprintf( 
-					'<li><a href="%s">%s - %s</a></li>',
-					esc_url( get_permalink() ),
+				$format = '<div class="ism_ajax_search_item">';
+					$format .= '<div class="ism_ajax_search_item_title">%s</div>';
+					$format .= '<div class="ism_ajax_search_item_date">%s</div>';
+				$format .= '</div>';
+
+				$output .= sprintf(
+					$format,
 					esc_html( get_the_title() ), 
 					esc_html( get_the_date($date_format) ) 
 				);
@@ -267,6 +661,8 @@ class ISM_Ajax_Search extends ET_Builder_Module {
 			wp_reset_postdata();
 		}
 
+		$output .= '</div>';
+		$output .= '</div>';
 		$output .= '</div>';
 		$output .= '</div>';
 

@@ -665,8 +665,13 @@ class ISM_Ajax_Search extends ET_Builder_Module {
 		$output .= '</div>';
 		$output .= '</div>';
 		$output .= '</div>';
-
-		return $output;
+		
+		return '<form role="search" method="get" id="searchform" action="' . home_url( '/' ) . '">
+			<div>
+			<input type="text" value="" name="s" id="s" placeholder="Search..." />
+			<div id="search-results"></div>
+			</div>
+		</form>';
 	}
 }
 

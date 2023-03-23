@@ -37,6 +37,9 @@ class ISM_IdeaSciModules extends DiviExtension {
 	public function __construct( $name = 'ideasci-modules', $args = array() ) {
 		$this->plugin_dir              = plugin_dir_path( __FILE__ );
 		$this->plugin_dir_url          = plugin_dir_url( $this->plugin_dir );
+		$this->_frontend_js_data 	= array(
+			'ajaxurl'   => admin_url( 'admin-ajax.php' ),
+		);
 		$this->_builder_js_data        = array(
 			'i10n' => array(
 				'ism_cta_all_options' => array(
@@ -80,7 +83,30 @@ class ISM_IdeaSciModules extends DiviExtension {
 		);
 
 		parent::__construct( $name, $args );
+
+		add_action( 'wp_ajax_my_search_query', 'my_search_query' );
+		add_action( 'wp_ajax_nopriv_my_search_query', 'my_search_query' );
+
 	}
+
+	function my_search_query() {
+		$query = $_POST['query'];
+		$search_results = new WP_Query( array(
+		  's' => $query,
+		  'post_type' => 'post',
+		  'posts_per_page' => 10
+		) );
+		if ( $search_results->have_posts() ) {
+		  while ( $search_results->have_posts() ) {
+			$search_results->the_post();
+			echo '<p><a href="' . get_permalink() . '">' . get_the_title() . '</a></p>';
+		  }
+		} else {
+		  echo '<p>No results found.</p>';
+		}
+		wp_reset_postdata();
+		wp_die();
+	  }
 }
 
 new ISM_IdeaSciModules;

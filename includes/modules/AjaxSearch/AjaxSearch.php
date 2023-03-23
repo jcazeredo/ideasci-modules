@@ -600,6 +600,21 @@ class ISM_Ajax_Search extends ET_Builder_Module {
 		);
 	}
 
+	public function process_multiple_checkboxes_value( $value, $values = array() ) {
+		if ( empty( $values ) && ! is_array( $values ) ) {
+			return '';
+		}
+		
+		$new_values = array();
+		$value 		= explode( '|', $value );
+		foreach( $value as $key => $val ) {
+			if ( 'on' === strtolower( $val ) ) {
+				array_push( $new_values, $values[$key] );
+			}
+		}
+		return implode( ',', $new_values );
+	}
+
 	/**
 	 * Render module output
 	 *
@@ -623,55 +638,27 @@ class ISM_Ajax_Search extends ET_Builder_Module {
 		$number_of_results		= $this->props['number_of_results'];
 		$no_result_text			= $this->props['no_result_text'];
 		
-		$args = array(
-			'post_type' => $include_post_types,
-			'posts_per_page' => $number_of_results,
-			'orderby' => $orderby,
-			'order' => $order,
+		$whitelisted_display_fields = array( 'title', 'date', 'excerpt', );
+		$display_fields = $this->process_multiple_checkboxes_value( $display_fields, $whitelisted_display_fields );
+
+		$search_field_wrap  = sprintf(
+			'<div class="ism_ajax_search_wrap">
+				<div class="ism_ajax_search_field_wrap">
+					<input type="search" placeholder="%1$s" class="ism_ajax_search_field" id="ism_ajax_search_field" data-search-post-type="%2$s" data-display-fields="%3$s" data-number-of-results="%4$s" data-no-result-text="%5$s" data-orderby="%6$s" data-order="%7$s" data-date-format="%8$s" />
+				</div>
+				<div class="ism_ajax_search_results_wrap"></div>
+			</div>',
+			esc_attr( $search_placeholder ),
+			esc_attr( $include_post_types ),
+			esc_attr( $display_fields ),
+			intval( $number_of_results ),
+			esc_attr( $no_result_text ),
+			esc_attr( $orderby ),
+			esc_attr( $order ),
+			esc_attr( $date_format ),
 		);
 		
-		$query = new WP_Query($args);
-		
-		$output = '<div class="ism_ajax_search_wrap">';
-		$output .= '<div class="ism_ajax_search_field_wrap"></div>';
-		$output .= '<div class="ism_ajax_search_results_wrap">';
-		$output .= '<div class="ism_ajax_search_results">';
-		$output .= '<div class="ism_ajax_search_items">';
-		
-		if ( $query->have_posts() ) {
-			
-		
-			while ( $query->have_posts() ) {
-				$query->the_post();
-				
-				$format = '<div class="ism_ajax_search_item">';
-					$format .= '<div class="ism_ajax_search_item_title">%s</div>';
-					$format .= '<div class="ism_ajax_search_item_date">%s</div>';
-				$format .= '</div>';
-
-				$output .= sprintf(
-					$format,
-					esc_html( get_the_title() ), 
-					esc_html( get_the_date($date_format) ) 
-				);
-			}
-		
-			$output .= '</div>';
-		
-			wp_reset_postdata();
-		}
-
-		$output .= '</div>';
-		$output .= '</div>';
-		$output .= '</div>';
-		$output .= '</div>';
-		
-		return '<form role="search" method="get" id="searchform" action="' . home_url( '/' ) . '">
-			<div>
-			<input type="text" value="" name="s" id="s" placeholder="Search..." />
-			<div id="search-results"></div>
-			</div>
-		</form>';
+		return $search_field_wrap;
 	}
 }
 

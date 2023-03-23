@@ -84,26 +84,62 @@ class ISM_IdeaSciModules extends DiviExtension {
 
 		parent::__construct( $name, $args );
 
-		add_action( 'wp_ajax_my_search_query', 'my_search_query' );
-		add_action( 'wp_ajax_nopriv_my_search_query', 'my_search_query' );
+		add_action( 'wp_ajax_ajax_search_callback', array( $this, 'ajax_search_callback' ) );
+        add_action( 'wp_ajax_nopriv_ajax_search_callback', array( $this, 'ajax_search_callback' ) );
 
 	}
 
-	function my_search_query() {
-		$query = $_POST['query'];
-		$search_results = new WP_Query( array(
-		  's' => $query,
-		  'post_type' => 'post',
-		  'posts_per_page' => 10
-		) );
-		if ( $search_results->have_posts() ) {
-		  while ( $search_results->have_posts() ) {
-			$search_results->the_post();
-			echo '<p><a href="' . get_permalink() . '">' . get_the_title() . '</a></p>';
-		  }
-		} else {
-		  echo '<p>No results found.</p>';
+	function ajax_search_callback() {
+
+		$search_term 		= isset( $_POST['search_term'] ) ? trim( sanitize_text_field( wp_unslash( $_POST['search_term'] ) ) ) : '';
+		$post_types			= isset( $_POST['post_types'] ) ? sanitize_text_field( wp_unslash( $_POST['post_types'] ) ) : '';
+		$display_fields		= isset( $_POST['display_fields'] ) ? sanitize_text_field( wp_unslash( $_POST['display_fields'] ) ) : '';
+        $date_format		= isset( $_POST['date_format'] ) ? sanitize_text_field( wp_unslash( $_POST['date_format'] ) ) : 'M, Y';
+		$number_of_results 	= isset( $_POST['number_of_results'] ) ? intval( wp_unslash( $_POST['number_of_results'] ) ) : '10';
+		$no_result_text 	= isset( $_POST['no_result_text'] ) ? sanitize_text_field( wp_unslash( $_POST['no_result_text'] ) ) : 'No result found';
+		$orderby 			= isset( $_POST['orderby'] ) ? sanitize_text_field( wp_unslash( $_POST['orderby'] ) ) : 'post_date';
+		$order 				= isset( $_POST['order'] ) ? sanitize_text_field( wp_unslash( $_POST['order'] ) ) : 'DESC';
+		
+		// convert $display_fields to array
+		$whitelisted_display_fields = array( 'title', 'date', 'excerpt', 'featured_image', 'product_price' );
+		$display_fields = explode( ',', $display_fields );
+		foreach( $display_fields as $key => $display_field ) {
+			if ( ! in_array( $display_field, $whitelisted_display_fields, true ) ) {
+				unset( $display_fields[$key] );
+			}
 		}
+
+		if ( empty( $display_fields ) ) {
+			$display_fields = array( 'title' );
+		}
+
+		$search_results = new WP_Query( 
+			array(
+				's' 				=> $search_term,
+				'post_type' 		=> $post_types,
+				'posts_per_page'	=> $number_of_results,
+				'order' 			=> $order,
+				'orderby' 			=> $orderby,
+			) 
+		);
+        
+		echo '<div class="ism_ajax_search_results">';
+		echo '<div class="ism_ajax_search_items">';
+
+		if ( $search_results->have_posts() ) {
+			while ( $search_results->have_posts() ) {
+				$search_results->the_post();
+				echo '<div class="ism_ajax_search_item">';
+				echo '<div class="ism_ajax_search_item_title">' . get_the_title() . '</div>';
+                echo '<div class="ism_ajax_search_item_date">' . get_the_date($date_format) . '</div>';
+				echo '</div>';
+			}
+		} else {
+		  echo '<p>' . esc_html( $no_result_text ) . '</p>';
+		}
+
+		echo '</div>';
+		
 		wp_reset_postdata();
 		wp_die();
 	  }

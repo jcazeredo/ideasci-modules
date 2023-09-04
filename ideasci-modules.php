@@ -25,15 +25,22 @@ You should have received a copy of the GNU General Public License
 along with Idea-sci Modules. If not, see https://www.gnu.org/licenses/gpl-2.0.html.
 */
 
+defined('ABSPATH') || die('No script kiddies please!');
 
-if ( ! function_exists( 'ism_initialize_extension' ) ):
-/**
- * Creates the extension's main class instance.
- *
- * @since 1.0.0
- */
-function ism_initialize_extension() {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/IdeaSciModules.php';
-}
-add_action( 'divi_extensions_init', 'ism_initialize_extension' );
+define('ISM_VERSION', '1.0.0');
+define('ISM_OPTION', 'idea-sci-modules');
+define('ISM_BASENAME', plugin_basename(__FILE__));
+define('ISM_PATH', plugin_dir_url(__FILE__));
+
+if (!function_exists('ism_initialize_extension')) :
+  /**
+   * Creates the extension's main class instance.
+   *
+   * @since 1.0.0
+   */
+  function ism_initialize_extension()
+  {
+    require_once plugin_dir_path(__FILE__) . 'includes/IdeaSciModules.php';
+  }
+  add_action('divi_extensions_init', 'ism_initialize_extension');
 endif;

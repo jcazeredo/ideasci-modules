@@ -29,7 +29,7 @@ class ISM_Ajax_Search extends ET_Builder_Module {
 		// Module name
 		$this->name             = esc_html__( 'Idea-sci search', 'ism-ideasci-modules' );
 		$this->main_css_element = '%%order_class%%';
-		
+
 		// Module Icon
 		// Load customized svg icon and use it on builder as module icon. If you don't have svg icon, you can use
 		// $this->icon for using etbuilder font-icon. (See CustomCta / ISM_CTA class)
@@ -65,12 +65,6 @@ class ISM_Ajax_Search extends ET_Builder_Module {
 					'display' => array(
 						'title' => esc_html__( 'Display', 'ism-ideasci-modules' ),
 					),
-					'scrollbar' => array(
-						'title' => esc_html__( 'Scrollbar', 'divi-plus' ),
-					),
-					'link' => array(
-						'title' => esc_html__( 'Link', 'ism-ideasci-modules' ),
-					),
 				),
 			),
 			'advanced' => array(
@@ -99,14 +93,8 @@ class ISM_Ajax_Search extends ET_Builder_Module {
                             'excerpt' => array(
                                 'name' => 'Excerpt',
                             ),
-                            'price' => array(
-                                'name' => 'Price',
-                            ),
                         ),
                         'tabbed_subtoggles' => true,
-					),
-					'featured_image_settings' => array(
-						'title' => esc_html__( 'Featured Image', 'ism-ideasci-modules' ),
 					),
 				),
 			),
@@ -236,40 +224,40 @@ class ISM_Ajax_Search extends ET_Builder_Module {
 				'form_field' => array(
 					'label' => esc_html__( 'Field', 'ism-ideasci-modules' ),
 					'css' => array(
-						'main' 			=> '%%order_class%% .ism_ajax_search_field',
-						'hover' 		=> '%%order_class%% .ism_ajax_search_field:hover',
-						'focus' 		=> '%%order_class%% .ism_ajax_search_field:focus',
-						'focus_hover' 	=> '%%order_class%% .ism_ajax_search_field:focus:hover',
+						'main' 			=> '%%order_class%% .ism_ajax_search_field_wrap input',
+						'hover' 		=> '%%order_class%% .ism_ajax_search_field_wrap input:hover',
+						'focus' 		=> '%%order_class%% .ism_ajax_search_field_wrap input:focus',
+						'focus_hover' 	=> '%%order_class%% .ism_ajax_search_field_wrap input:focus:hover',
 					),
 					'font_field' => array(
 						'css' => array(
 							'main' => implode(', ', array(
-								'%%order_class%% .ism_ajax_search_field',
-								'%%order_class%% .ism_ajax_search_field::placeholder',
-								'%%order_class%% .ism_ajax_search_field::-webkit-input-placeholder',
-								'%%order_class%% .ism_ajax_search_field::-ms-input-placeholder',
-								'%%order_class%% .ism_ajax_search_field::-moz-placeholder',
+								'%%order_class%% .ism_ajax_search_field_wrap input',
+								'%%order_class%% .ism_ajax_search_field_wrap input::placeholder',
+								'%%order_class%% .ism_ajax_search_field_wrap input::-webkit-input-placeholder',
+								'%%order_class%% .ism_ajax_search_field_wrap input::-ms-input-placeholder',
+								'%%order_class%% .ism_ajax_search_field_wrap input::-moz-placeholder',
 							) ),
 							'hover' => implode(', ', array(
-								'%%order_class%% .ism_ajax_search_field:',
-								'%%order_class%% .ism_ajax_search_field::placeholder',
-								'%%order_class%% .ism_ajax_search_field::-webkit-input-placeholder',
-								'%%order_class%% .ism_ajax_search_field::-ms-input-placeholder',
-								'%%order_class%% .ism_ajax_search_field::-moz-placeholder',
+								'%%order_class%% .ism_ajax_search_field_wrap input:',
+								'%%order_class%% .ism_ajax_search_field_wrap input::placeholder',
+								'%%order_class%% .ism_ajax_search_field_wrap input::-webkit-input-placeholder',
+								'%%order_class%% .ism_ajax_search_field_wrap input::-ms-input-placeholder',
+								'%%order_class%% .ism_ajax_search_field_wrap input::-moz-placeholder',
 							) ),
 							'focus' => implode(', ', array(
-								'%%order_class%% .ism_ajax_search_field',
-								'%%order_class%% .ism_ajax_search_field::placeholder',
-								'%%order_class%% .ism_ajax_search_field::-webkit-input-placeholder',
-								'%%order_class%% .ism_ajax_search_field::-ms-input-placeholder',
-								'%%order_class%% .ism_ajax_search_field::-moz-placeholder',
+								'%%order_class%% .ism_ajax_search_field_wrap input',
+								'%%order_class%% .ism_ajax_search_field_wrap input::placeholder',
+								'%%order_class%% .ism_ajax_search_field_wrap input::-webkit-input-placeholder',
+								'%%order_class%% .ism_ajax_search_field_wrap input::-ms-input-placeholder',
+								'%%order_class%% .ism_ajax_search_field_wrap input::-moz-placeholder',
 							) ),
 							'focus_hover' => implode(', ', array(
-								'%%order_class%% .ism_ajax_search_field',
-								'%%order_class%% .ism_ajax_search_field::placeholder',
-								'%%order_class%% .ism_ajax_search_field::-webkit-input-placeholder',
-								'%%order_class%% .ism_ajax_search_field::-ms-input-placeholder',
-								'%%order_class%% .ism_ajax_search_field::-moz-placeholder',
+								'%%order_class%% .ism_ajax_search_field_wrap input',
+								'%%order_class%% .ism_ajax_search_field_wrap input::placeholder',
+								'%%order_class%% .ism_ajax_search_field_wrap input::-webkit-input-placeholder',
+								'%%order_class%% .ism_ajax_search_field_wrap input::-ms-input-placeholder',
+								'%%order_class%% .ism_ajax_search_field_wrap input::-moz-placeholder',
 							) ),
 							'placeholder' => true,
 						),
@@ -286,7 +274,7 @@ class ISM_Ajax_Search extends ET_Builder_Module {
 					'margin_padding' => array(
 						'use_margin' => false,
 						'css'        => array(
-							'padding' => '%%order_class%% .ism_ajax_search_field',
+							'padding' => '%%order_class%% .ism_ajax_search_field_wrap input',
 						),
 					),
 					'box_shadow' => false,
@@ -297,12 +285,12 @@ class ISM_Ajax_Search extends ET_Builder_Module {
 							),
 							'css' => array(
 								'main' => array(
-									'border_radii'  => '%%order_class%% .ism_ajax_search_field',
-									'border_styles' => '%%order_class%% .ism_ajax_search_field',
+									'border_radii'  => '%%order_class%% .ism_ajax_search_field_wrap input',
+									'border_styles' => '%%order_class%% .ism_ajax_search_field_wrap input',
 								),
 								'important' => 'all',
 							),
-							'labism_prefix' => esc_html__( 'Field', 'ism-ideasci-modules' ),
+							'label_prefix' => esc_html__( 'Field', 'ism-ideasci-modules' ),
 						),
 					),
 					'tab_slug' => 'advanced',
@@ -311,7 +299,7 @@ class ISM_Ajax_Search extends ET_Builder_Module {
 			),
 			'form_field' => array(
 				'form_field' => array(
-					'label' => esc_html__( 'Field', 'ism-ideasci-modules' ),
+					'label' => esc_html__( 'Item', 'ism-ideasci-modules' ),
 					'css' => array(
 						'main' 			=> '%%order_class%% .ism_ajax_search_item',
 						'hover' 		=> '%%order_class%% .ism_ajax_search_item:hover',
@@ -578,6 +566,19 @@ class ISM_Ajax_Search extends ET_Builder_Module {
 				'toggle_slug'      		=> 'search_area',
 				'description'      		=> esc_html__( 'Here you can choose which post types you would like to search in.', 'ism-ideasci-modules' ),
 			),
+			'show_search_icon' => array(
+				'label'            		=> esc_html__( 'Show Search Icon', 'ism-ideasci-modules' ),
+				'type'             		=> 'yes_no_button',
+				'option_category'  		=> 'configuration',
+				'options'          		=> array(
+					'on'  => esc_html__( 'Yes', 'ism-ideasci-modules' ),
+					'off' => esc_html__( 'No', 'ism-ideasci-modules' ),
+				),
+				'default'          		=> 'on',
+				'tab_slug'         		=> 'general',
+				'toggle_slug'      		=> 'display',
+				'description'      		=> esc_html__( 'This will turn the search icon on and off.', 'ism-ideasci-modules' ),
+			),
 			'display_fields' => array(
 				'label'            		=> esc_html__( 'Display Fields', 'ism-ideasci-modules' ),
 				'type'             		=> 'multiple_checkboxes',
@@ -633,6 +634,7 @@ class ISM_Ajax_Search extends ET_Builder_Module {
 		$orderby				= $this->props['orderby'];
 		$order 					= $this->props['order'];
 		$include_post_types 	= $this->props['include_post_types'];
+		$show_search_icon		= $this->props['show_search_icon'];
 		$display_fields			= $this->props['display_fields'];
 		$date_format			= $this->props['date_format'];
 		$number_of_results		= $this->props['number_of_results'];
@@ -640,14 +642,17 @@ class ISM_Ajax_Search extends ET_Builder_Module {
 		
 		$whitelisted_display_fields = array( 'title', 'date', 'excerpt', );
 		$display_fields = $this->process_multiple_checkboxes_value( $display_fields, $whitelisted_display_fields );
+		
+		$search_icon = '<span class="ism_ajax_search_search_icon">
+							<span class="et-pb-icon">&#x55;</span>
+						</span>';
 
-		$search_field_wrap  = sprintf(
-			'<div class="ism_ajax_search_wrap">
-				<div class="ism_ajax_search_field_wrap">
-					<input type="search" placeholder="%1$s" class="ism_ajax_search_field" id="ism_ajax_search_field" data-search-post-type="%2$s" data-display-fields="%3$s" data-number-of-results="%4$s" data-no-result-text="%5$s" data-orderby="%6$s" data-order="%7$s" data-date-format="%8$s" />
-				</div>
-				<div class="ism_ajax_search_results_wrap"></div>
-			</div>',
+		$search_field_wrap = sprintf(
+			'<div class="ism_ajax_search_field_wrap">
+				<input type="search" placeholder="%1$s" class="ism_ajax_search_field" id="ism_ajax_search_field" data-search-post-type="%2$s" data-display-fields="%3$s" data-number-of-results="%4$s" data-no-result-text="%5$s" data-orderby="%6$s" data-order="%7$s" data-date-format="%8$s" />
+				%9$s
+			</div>
+			<div class="ism_ajax_search_results_wrap"></div>',
 			esc_attr( $search_placeholder ),
 			esc_attr( $include_post_types ),
 			esc_attr( $display_fields ),
@@ -656,6 +661,7 @@ class ISM_Ajax_Search extends ET_Builder_Module {
 			esc_attr( $orderby ),
 			esc_attr( $order ),
 			esc_attr( $date_format ),
+			'on' === $show_search_icon ? $search_icon : '',
 		);
 		
 		return $search_field_wrap;

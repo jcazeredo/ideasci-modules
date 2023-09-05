@@ -65,6 +65,7 @@ class ISM_IdeaSciModules extends DiviExtension
     $this->plugin_dir_url          = plugin_dir_url($this->plugin_dir);
     $this->_frontend_js_data   = array(
       'ajaxurl'   => admin_url('admin-ajax.php'),
+      'ajaxnonce'  => wp_create_nonce('ism-nonce'),
     );
     $this->_builder_js_data        = array(
       'i10n' => array(
@@ -109,9 +110,32 @@ class ISM_IdeaSciModules extends DiviExtension
     );
 
     parent::__construct($name, $args);
+    $this->plugin_setup();
 
     add_action('wp_ajax_ajax_search_callback', array($this, 'ajax_search_callback'));
+    add_filter('nonce_user_logged_out', array($this, 'ism_ajax_search_update_nonce'), 10, 2);
     add_action('wp_ajax_nopriv_ajax_search_callback', array($this, 'ajax_search_callback'));
+  }
+
+  public function ism_ajax_search_update_nonce($uid, $action = -1)
+  {
+    if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins'))) && !is_user_logged_in() && $action === 'ism-nonce') {
+      return get_current_user_id();
+    }
+    return $uid;
+  }
+
+
+  /**
+   * plugin setup function.
+   *
+   *@since 1.0.0
+   */
+  public function plugin_setup()
+  {
+    if (is_admin()) {
+      require_once plugin_dir_path(__FILE__) . 'core/class-update.php';
+    }
   }
 
   function ajax_search_callback()

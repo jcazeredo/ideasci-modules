@@ -8,7 +8,7 @@
 		"react-dom": "^16.3.2"
 	},
 	"scripts": {
-		"start": "divi-scripts start",
+		"start": "kill -9 $(lsof -ti:3000); divi-scripts start",
 		"build": "divi-scripts build",
 		"zip": "divi-scripts build && divi-scripts zip",
 		"eject": "divi-scripts eject"

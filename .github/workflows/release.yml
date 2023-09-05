@@ -1,0 +1,64 @@
+name: Create Release on Tag Push
+
+# Trigger the workflow on pushes to the master branch that create new tags
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  create_release:
+    runs-on: ubuntu-20.04
+
+    steps:
+      # Set up Node.js environment with version 14
+      - name: Install Dependencies
+        run: |
+          # Update and install required packages
+          sudo apt-get update
+          sudo apt-get install -y curl git xz-utils gettext 
+
+          # Download Node.js 14.18.1 binary
+          curl -o /tmp/node.tar.xz https://nodejs.org/dist/v14.18.1/node-v14.18.1-linux-x64.tar.xz
+
+          # Extract and install Node.js
+          sudo tar -xJf /tmp/node.tar.xz -C /usr/local --strip-components=1
+
+          # Cleanup temporary files
+          rm /tmp/node.tar.xz
+
+          # Check Node.js and npm versions
+          node -v
+          npm -v
+
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      # Install project dependencies (if any)
+      - name: Install project dependencies
+        run: npm install --verbose
+
+      # Create a ZIP archive using the "npm run zip" command
+      - name: Create ZIP archive
+        run: npm run zip
+        working-directory: . # Adjust if your repository is in a subfolder
+              
+      # Configure Git user for this action
+      - name: Set up Git
+        run: |
+          git config --local user.email "jcdazeredo@gmail.com"
+          git config --local user.name "Julio Cesar de Azeredo"
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+
+      # Create a GitHub release using the softprops/action-gh-release action
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          # Specify the files to include in the release (ZIP archive and info.json)
+          files: |
+            ${{ github.event.repository.name }}.zip
+            info.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}

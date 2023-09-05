@@ -1,36 +1,114 @@
 <?php
-if (!class_exists('ISM_Ajax_Search')) {
+defined('ABSPATH') or die('No script kiddies please!');
 
+if (!class_exists('ISM_Update')) {
   class ISM_Update
   {
+    /**
+     * Plugin Name.
+     *
+     * @since 	 1.0.2
+     * @access   private
+     * @var 	 string
+     */
+    private $plugin_name;
 
-    public $plugin_slug;
-    public $version;
-    public $cache_key;
-    public $cache_allowed;
+    /**
+     * Plugin Version.
+     *
+     * @since 	 1.0.2
+     * @access   private
+     * @var 	 string
+     */
+    private $plugin_version;
 
+    /**
+     * Metadata Url.
+     *
+     * @since 	 1.0.2
+     * @access   private
+     * @var 	 string
+     */
+    private $metadata_url;
+
+    /**
+     * Plugin Upgrade Transient.
+     *
+     * @since 	 1.0.2
+     * @access   private
+     * @var 	 string
+     */
+    private $upgrade_transient;
+
+    /**
+     * Last checked update.
+     *
+     * @since 	 1.0.2
+     * @access   private
+     * @var 	 string
+     */
+    private $last_checked;
+
+    /**
+     * Last checked update option.
+     *
+     * @since 	 1.0.2
+     * @access   private
+     * @var 	 string
+     */
+    private $last_checked_option;
+
+    /**
+     * Initialize the class and set its properties.
+     *
+     * @since    1.0.2
+     * @param    string    $plugin_name   	The name of this plugin.
+     * @param    string    $version  		The version of this plugin.
+     */
     public function __construct()
     {
+      $this->plugin_name      = 'ideasci-modules';
+      $this->plugin_version    = ISM_VERSION;
+      $this->plugin_basename    = ISM_BASENAME;
+      $this->metadata_url     = 'https://raw.githubusercontent.com/jcazeredo/ideasci-modules/master/info.json';
+      $this->upgrade_transient    = 'upgrade_ism';
+      $this->last_checked_option  = 'ism_last_checked';
+      $this->last_checked     = get_option($this->last_checked_option, 0);
 
-      $this->plugin_slug = plugin_basename(__DIR__);
-      $this->version = '1.0';
-      $this->cache_key = 'ism_custom_upd';
-      $this->cache_allowed = false;
-
-      add_filter('plugins_api', array($this, 'info'), 20, 3);
-      add_filter('site_transient_update_plugins', array($this, 'update'));
-      add_action('upgrader_process_complete', array($this, 'purge'), 10, 2);
+      add_action('upgrader_process_complete', array($this, 'update_complete'), 10, 2);
+      add_filter('pre_set_site_transient_update_plugins', array($this, 'check_update'));
+      add_filter('plugins_api', array($this, 'check_info'), 10, 3);
     }
 
-    public function request()
+    /**
+     * Check for updates.
+     *
+     * @since    1.0.0
+     */
+    public function check_update($transient)
     {
+      // trying to get from cache first, to disable cache comment 10,20,21,22,24
+      $response = get_transient($this->upgrade_transient);
 
-      $remote = get_transient($this->cache_key);
+      if (!$response && isset($transient->response[$this->plugin_basename])) {
+        unset($transient->response[$this->plugin_basename]);
+        return $transient;
+      }
 
-      if (false === $remote || !$this->cache_allowed) {
+      if (!$response && empty($transient->checked)) {
+        return $transient;
+      }
 
-        $remote = wp_remote_get(
-          'https://rudrastyh.com/wp-content/uploads/updater/info.json',
+      if (
+        current_user_can('update_plugins') &&
+        (
+          (false === $response && ((time() - $this->last_checked) > 43200)) ||
+          (false === $response && isset($_REQUEST['force-check']) && $_REQUEST['force-check'] == '1')
+        )
+      ) {
+
+        $request = wp_remote_get(
+          $this->metadata_url,
           array(
             'timeout' => 10,
             'headers' => array(
@@ -39,117 +117,105 @@ if (!class_exists('ISM_Ajax_Search')) {
           )
         );
 
-        if (
-          is_wp_error($remote)
-          || 200 !== wp_remote_retrieve_response_code($remote)
-          || empty(wp_remote_retrieve_body($remote))
-        ) {
-          return false;
+        if (!is_wp_error($request) && !empty($request['body'])) {
+          $response = json_decode(wp_remote_retrieve_body($request));
+          if (version_compare($this->plugin_version, $response->version, '<')) {
+            set_transient($this->upgrade_transient, $response, 43200); // 12 hours cache
+          }
         }
 
-        set_transient($this->cache_key, $remote, DAY_IN_SECONDS);
+        update_option($this->last_checked_option, time());
+        $this->last_checked = time();
       }
 
-      $remote = json_decode(wp_remote_retrieve_body($remote));
+      if ($response && current_user_can('update_plugins')) {
+        if (version_compare($this->plugin_version, $response->version, '<')) {
+          $obj            = new stdClass();
+          $obj->name       = $response->name;
+          $obj->slug       = $this->plugin_name;
+          $obj->plugin     = $this->plugin_basename;
+          $obj->new_version   = $response->version;
+          $obj->tested     = $response->tested;
+          $obj->icons         = array(
+            '1x' => 'https://diviextended.com/wp-content/uploads/2018/04/elicus-128x128.png',
+            '2x' => 'https://diviextended.com/wp-content/uploads/2018/04/elicus-256x256.png',
+          );
+          $obj->package     = $response->download_url;
 
-      return $remote;
-    }
-
-
-    function info($res, $action, $args)
-    {
-
-      // print_r( $action );
-      // print_r( $args );
-
-      // do nothing if you're not getting plugin information right now
-      if ('plugin_information' !== $action) {
-        return $res;
-      }
-
-      // do nothing if it is not our plugin
-      if ($this->plugin_slug !== $args->slug) {
-        return $res;
-      }
-
-      // get updates
-      $remote = $this->request();
-
-      if (!$remote) {
-        return $res;
-      }
-
-      $res = new stdClass();
-
-      $res->name = $remote->name;
-      $res->slug = $remote->slug;
-      $res->version = $remote->version;
-      $res->tested = $remote->tested;
-      $res->requires = $remote->requires;
-      $res->author = $remote->author;
-      $res->author_profile = $remote->author_profile;
-      $res->download_link = $remote->download_url;
-      $res->trunk = $remote->download_url;
-      $res->requires_php = $remote->requires_php;
-      $res->last_updated = $remote->last_updated;
-
-      $res->sections = array(
-        'description' => $remote->sections->description,
-        'installation' => $remote->sections->installation,
-        'changelog' => $remote->sections->changelog
-      );
-
-      if (!empty($remote->banners)) {
-        $res->banners = array(
-          'low' => $remote->banners->low,
-          'high' => $remote->banners->high
-        );
-      }
-
-      return $res;
-    }
-
-    public function update($transient)
-    {
-
-      if (empty($transient->checked)) {
-        return $transient;
-      }
-
-      $remote = $this->request();
-
-      if (
-        $remote
-        && version_compare($this->version, $remote->version, '<')
-        && version_compare($remote->requires, get_bloginfo('version'), '<=')
-        && version_compare($remote->requires_php, PHP_VERSION, '<')
-      ) {
-        $res = new stdClass();
-        $res->slug = $this->plugin_slug;
-        $res->plugin = plugin_basename(__FILE__); // misha-update-plugin/misha-update-plugin.php
-        $res->new_version = $remote->version;
-        $res->tested = $remote->tested;
-        $res->package = $remote->download_url;
-
-        $transient->response[$res->plugin] = $res;
+          $transient->response[$obj->plugin] = $obj;
+        }
       }
 
       return $transient;
     }
 
-    public function purge($upgrader, $options)
+    /**
+     * Display metadata in popup.
+     *
+     * @since    1.0.0
+     */
+    public function check_info($res, $action, $args)
     {
 
-      if (
-        $this->cache_allowed
-        && 'update' === $options['action']
-        && 'plugin' === $options['type']
-      ) {
+      // do nothing if this is not about getting plugin information
+      if ('plugin_information' !== $action) {
+        return $res;
+      }
+
+      // do nothing if it is not our plugin	
+      if ($this->plugin_name !== $args->slug) {
+        return $res;
+      }
+
+      $response = get_transient($this->upgrade_transient);
+
+      if ($response && current_user_can('update_plugins')) {
+        if (version_compare($this->plugin_version, $response->version, '<')) {
+          $metadata            = new stdClass();
+
+          $metadata->sections = array(
+            'description' => $response->sections->description,
+            'installation' => $response->sections->installation,
+            'changelog' => $response->sections->changelog
+          );
+
+          if (!empty($response->banners)) {
+            $metadata->banners = array(
+              'low' => $response->banners->low,
+              'high' => $response->banners->high
+            );
+          }
+
+          $metadata->version  = $response->version;
+          $metadata->slug  = $response->slug;
+          $metadata->name  = $response->name;
+          $metadata->download_link   = $response->download_url;
+          return $metadata;
+        }
+      }
+
+      return $res;
+    }
+
+    /**
+     * Delete transient of update completed
+     *
+     * @since    1.0.0
+     */
+    public function update_complete($upgrader_object, $options)
+    {
+
+      if ('update' === $options['action'] && 'plugin' === $options['type']) {
         // just clean the cache when new plugin version is installed
-        delete_transient($this->cache_key);
+        foreach ($options['plugins'] as $plugin) {
+          if ($plugin === $this->plugin_basename) {
+            delete_transient($this->upgrade_transient);
+            update_option($this->last_checked_option, time());
+            $this->last_checked = time();
+          }
+        }
       }
     }
   }
-
-  new ISM_Ajax_Search();
+  new ISM_Update;
 }

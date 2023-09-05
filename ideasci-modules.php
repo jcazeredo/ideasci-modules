@@ -44,22 +44,3 @@ if (!function_exists('ism_initialize_extension')) :
   }
   add_action('divi_extensions_init', 'ism_initialize_extension');
 endif;
-
-// Create a custom admin page and add a button
-function custom_admin_page()
-{
-  add_menu_page('Custom Update Check', 'Custom Update Check', 'manage_options', 'custom-update-check', 'custom_update_check_page');
-}
-
-function custom_update_check_page()
-{
-?>
-  <div class="wrap">
-    <h2>Custom Update Check</h2>
-    <p>Click the button below to trigger the update check.</p>
-    <form method="post">
-      <input type="submit" name="custom_update_check" class="button button-primary" value="Check for Updates">
-    </form>
-  </div>
-<?php
-}

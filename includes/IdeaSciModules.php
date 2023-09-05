@@ -135,6 +135,7 @@ class ISM_IdeaSciModules extends DiviExtension
   {
     if (is_admin()) {
       require_once plugin_dir_path(__FILE__) . 'core/class-update.php';
+      require_once plugin_dir_path(__FILE__) . 'admin/admin.php';
     }
   }
 

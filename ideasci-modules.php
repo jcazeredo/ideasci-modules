@@ -3,7 +3,7 @@
 Plugin Name: Idea-sci Modules
 Plugin URI:  https://www.idea-sci.com/
 Description: Custom modules for idea-sci websites
-Version:     1.0.0
+Version:     1.0.10
 Author:      Idea-sci
 Author URI:  https://www.idea-sci.com/
 License:     GPL2
@@ -27,7 +27,7 @@ along with Idea-sci Modules. If not, see https://www.gnu.org/licenses/gpl-2.0.ht
 
 defined('ABSPATH') || die('No script kiddies please!');
 
-define('ISM_VERSION', '1.0.0');
+define('ISM_VERSION', '1.0.10');
 define('ISM_OPTION', 'idea-sci-modules');
 define('ISM_BASENAME', plugin_basename(__FILE__));
 define('ISM_PATH', plugin_dir_url(__FILE__));
@@ -44,3 +44,46 @@ if (!function_exists('ism_initialize_extension')) :
   }
   add_action('divi_extensions_init', 'ism_initialize_extension');
 endif;
+
+// Create a custom admin page and add a button
+function custom_admin_page()
+{
+  add_menu_page('Custom Update Check', 'Custom Update Check', 'manage_options', 'custom-update-check', 'custom_update_check_page');
+}
+
+function custom_update_check_page()
+{
+?>
+  <div class="wrap">
+    <h2>Custom Update Check</h2>
+    <p>Click the button below to trigger the update check.</p>
+    <form method="post">
+      <input type="submit" name="custom_update_check" class="button button-primary" value="Check for Updates">
+    </form>
+  </div>
+<?php
+}
+
+add_action('admin_menu', 'custom_admin_page');
+
+// Hook a function to handle the update check when the button is clicked
+function handle_custom_update_check()
+{
+  if (isset($_POST['custom_update_check'])) {
+    // Simulate the update check process
+    simulate_update_check();
+  }
+}
+
+add_action('admin_init', 'handle_custom_update_check');
+
+// Simulate the update check process
+function simulate_update_check()
+{
+  // Replace this with your update check logic
+  // Set transient data to trigger the pre_set_site_transient_update_plugins filter
+  set_site_transient('update_plugins', get_site_transient('update_plugins'), MINUTE_IN_SECONDS);
+
+  // Output a message
+  echo '<div class="updated"><p>Update check completed. Check for updates has been triggered.</p></div>';
+}

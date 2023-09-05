@@ -4,149 +4,146 @@ defined('ABSPATH') or die('No script kiddies please!');
 if (!class_exists('ISM_Update')) {
   class ISM_Update
   {
-    /**
-     * Plugin Name.
-     *
-     * @since 	 1.0.2
-     * @access   private
-     * @var 	 string
-     */
     private $plugin_name;
-
-    /**
-     * Plugin Version.
-     *
-     * @since 	 1.0.2
-     * @access   private
-     * @var 	 string
-     */
     private $plugin_version;
-
-    /**
-     * Metadata Url.
-     *
-     * @since 	 1.0.2
-     * @access   private
-     * @var 	 string
-     */
-    private $metadata_url;
-
-    /**
-     * Plugin Upgrade Transient.
-     *
-     * @since 	 1.0.2
-     * @access   private
-     * @var 	 string
-     */
+    private $github_url;
+    private $download_base_url;
     private $upgrade_transient;
-
-    /**
-     * Last checked update.
-     *
-     * @since 	 1.0.2
-     * @access   private
-     * @var 	 string
-     */
     private $last_checked;
-
-    /**
-     * Last checked update option.
-     *
-     * @since 	 1.0.2
-     * @access   private
-     * @var 	 string
-     */
     private $last_checked_option;
+    private $plugin_basename;
+    private $use_cache;
 
-    /**
-     * Initialize the class and set its properties.
-     *
-     * @since    1.0.2
-     * @param    string    $plugin_name   	The name of this plugin.
-     * @param    string    $version  		The version of this plugin.
-     */
+    const CACHE_EXPIRATION = 43200;
+
     public function __construct()
     {
-      $this->plugin_name      = 'ideasci-modules';
-      $this->plugin_version    = ISM_VERSION;
-      $this->plugin_basename    = ISM_BASENAME;
-      $this->metadata_url     = 'https://raw.githubusercontent.com/jcazeredo/ideasci-modules/master/info.json';
+      $this->plugin_name          = 'ideasci-modules';
+      $this->plugin_version       = ISM_VERSION;
+      $this->plugin_basename      = ISM_BASENAME;
+      $this->github_url           = 'https://api.github.com/repos/jcazeredo/ideasci-modules/releases/latest';
+      $this->download_base_url    = 'https://github.com/jcazeredo/ideasci-modules/releases/download/';
       $this->upgrade_transient    = 'upgrade_ism';
       $this->last_checked_option  = 'ism_last_checked';
-      $this->last_checked     = get_option($this->last_checked_option, 0);
+      $this->last_checked         = get_option($this->last_checked_option, 0);
+      $this->use_cache            = true;
 
       add_action('upgrader_process_complete', array($this, 'update_complete'), 10, 2);
       add_filter('pre_set_site_transient_update_plugins', array($this, 'check_update'));
       add_filter('plugins_api', array($this, 'check_info'), 10, 3);
     }
 
-    /**
-     * Check for updates.
-     *
-     * @since    1.0.0
-     */
     public function check_update($transient)
     {
-      // trying to get from cache first, to disable cache comment 10,20,21,22,24
-      $response = get_transient($this->upgrade_transient);
+      // Attempt to get cached response
+      if ($this->use_cache) {
+        $response = get_transient($this->upgrade_transient);
+      }
 
-      if (!$response && isset($transient->response[$this->plugin_basename])) {
+
+      // Remove the plugin update from transient if the cached response is present
+      if ($this->use_cache && $response && isset($transient->response[$this->plugin_basename])) {
         unset($transient->response[$this->plugin_basename]);
         return $transient;
       }
 
-      if (!$response && empty($transient->checked)) {
+      // If no cached response and no checked updates, return the transient as is
+      if ($this->use_cache && !$response && empty($transient->checked)) {
         return $transient;
       }
 
+      // Check if the user can update plugins and if it's time to check for updates
       if (
         current_user_can('update_plugins') &&
         (
-          (false === $response && ((time() - $this->last_checked) > 43200)) ||
-          (false === $response && isset($_REQUEST['force-check']) && $_REQUEST['force-check'] == '1')
+          (!$this->use_cache || !$response && ((time() - $this->last_checked) > self::CACHE_EXPIRATION)) ||
+          (!$response && isset($_REQUEST['force-check']) && $_REQUEST['force-check'] == '1')
         )
       ) {
 
-        $request = wp_remote_get(
-          $this->metadata_url,
-          array(
-            'timeout' => 10,
-            'headers' => array(
-              'Accept' => 'application/json'
-            )
-          )
-        );
+        // Fetch metadata from GitHub
+        $latest_release_metadata = $this->get_latest_release_metadata();
 
-        if (!is_wp_error($request) && !empty($request['body'])) {
-          $response = json_decode(wp_remote_retrieve_body($request));
-          if (version_compare($this->plugin_version, $response->version, '<')) {
-            set_transient($this->upgrade_transient, $response, 43200); // 12 hours cache
-          }
-        }
+        if ($latest_release_metadata && version_compare($this->plugin_version, $latest_release_metadata->version, '<')) {
+          // Cache the response
+          set_transient($this->upgrade_transient, $latest_release_metadata, self::CACHE_EXPIRATION);
 
-        update_option($this->last_checked_option, time());
-        $this->last_checked = time();
-      }
+          // Update the last checked time
+          update_option($this->last_checked_option, time());
+          $this->last_checked = time();
 
-      if ($response && current_user_can('update_plugins')) {
-        if (version_compare($this->plugin_version, $response->version, '<')) {
-          $obj            = new stdClass();
-          $obj->name       = $response->name;
-          $obj->slug       = $this->plugin_name;
-          $obj->plugin     = $this->plugin_basename;
-          $obj->new_version   = $response->version;
-          $obj->tested     = $response->tested;
-          $obj->icons         = array(
-            '1x' => 'https://diviextended.com/wp-content/uploads/2018/04/elicus-128x128.png',
-            '2x' => 'https://diviextended.com/wp-content/uploads/2018/04/elicus-256x256.png',
-          );
-          $obj->package     = $response->download_url;
-
-          $transient->response[$obj->plugin] = $obj;
+          // Add plugin update information to the transient
+          $this->addPluginUpdateToTransient($transient, $latest_release_metadata);
         }
       }
 
       return $transient;
+    }
+
+    private function get_latest_release_metadata()
+    {
+
+      // Request github latest release
+      $request_github = wp_remote_get(
+        $this->github_url,
+        array(
+          'timeout' => 10,
+          'headers' => array(
+            'Accept' => 'application/json',
+          ),
+        )
+      );
+
+      if (is_wp_error($request_github)) {
+        // Handle the error gracefully, log it, or return an appropriate response
+        return false;
+      }
+
+      $response_github = json_decode(wp_remote_retrieve_body($request_github));
+
+      // Create the required URLs
+      $base_url = $this->download_base_url . "/" . $response_github->tag_name . "/";
+      $metadata_url = $base_url . "info.json";
+
+      // Request the metadata
+      $request_metadata = wp_remote_get(
+        $metadata_url,
+        array(
+          'timeout' => 10,
+          'headers' => array(
+            'Accept' => 'application/json',
+          ),
+        )
+      );
+
+      if (is_wp_error($request_metadata)) {
+        // Handle the error gracefully, log it, or return an appropriate response
+        return false;
+      }
+
+      $metadata = json_decode(wp_remote_retrieve_body($request_metadata));
+
+      $metadata->download_link = $base_url . $metadata->zip_filename;;
+
+      return $metadata;
+    }
+
+
+    private function addPluginUpdateToTransient(&$transient, $response)
+    {
+      $obj = new stdClass();
+      $obj->name = $response->name;
+      $obj->slug = $this->plugin_name;
+      $obj->plugin = $this->plugin_basename;
+      $obj->new_version = $response->version;
+      $obj->tested = $response->tested;
+      $obj->icons = array(
+        '1x' => 'https://diviextended.com/wp-content/uploads/2018/04/elicus-128x128.png',
+        '2x' => 'https://diviextended.com/wp-content/uploads/2018/04/elicus-256x256.png',
+      );
+      $obj->package = $response->download_link;
+
+      $transient->response[$obj->plugin] = $obj;
     }
 
     /**
@@ -186,10 +183,12 @@ if (!class_exists('ISM_Update')) {
             );
           }
 
-          $metadata->version  = $response->version;
-          $metadata->slug  = $response->slug;
-          $metadata->name  = $response->name;
-          $metadata->download_link   = $response->download_url;
+          $metadata->version          = $response->version;
+          $metadata->slug             = $response->slug;
+          $metadata->name             = $response->name;
+          $metadata->download_link    = $response->download_link;
+
+          echo $metadata->download_link;
           return $metadata;
         }
       }

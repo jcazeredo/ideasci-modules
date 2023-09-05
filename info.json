@@ -3,7 +3,7 @@
   "slug": "ideasci-modules",
   "author": "<a href='https://idea-sci.com'>Idea-sci</a>",
   "author_profile": "http://idea-sci.com",
-  "version": "1.0.10",
+  "version": "1.0.0",
   "zip_filename": "ideasci-modules.zip",
   "requires": "5.6",
   "tested": "6.2",

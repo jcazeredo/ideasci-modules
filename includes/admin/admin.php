@@ -2,31 +2,49 @@
 
 class ISM_IdeaSciAdmin
 {
+  private $modules = [];
+  private $modules_folder = "extensions";
+
   public function __construct()
   {
-    // Register hooks for admin menu and settings
-    add_action('admin_menu', array($this, 'add_admin_menu'));
-    add_action('admin_init', array($this, 'register_settings'));
+    $moduleDefinitions = [
+      'Events' => 'ISM_EventsAdmin',
+      // Add more modules as needed
+    ];
 
-    // Enqueue your CSS file
-    add_action('admin_enqueue_scripts', array($this, 'enqueue_plugin_styles'));
+    add_action('admin_enqueue_scripts', [$this, 'enqueue_plugin_assets']);
+
+    $this->load_modules($moduleDefinitions);
+
+    add_action('admin_menu', [$this, 'add_admin_menu']);
+    add_action('admin_init', [$this, 'register_settings']);
   }
 
-  public function enqueue_plugin_styles()
+  private function load_modules($moduleDefinitions)
   {
-    // Enqueue your CSS file
+    foreach ($moduleDefinitions as $folder => $class) {
+      $module_file_path = plugin_dir_path(__FILE__) . "{$this->modules_folder}/{$folder}/{$folder}.php";
+
+      require_once $module_file_path;
+
+      $this->modules[] = new $class();
+    }
+  }
+
+  public function enqueue_plugin_assets()
+  {
     wp_enqueue_style('plugin-style', plugin_dir_url(__FILE__) . 'styles.css');
+    wp_enqueue_script('plugin-script', plugin_dir_url(__FILE__) . 'script.js', ['jquery'], null, true);
   }
 
   public function add_admin_menu()
   {
-    // Add main menu and submenus
     add_menu_page(
       esc_html__('Idea-sci', 'ism-ideasci-modules'),
       esc_html__('Idea-sci', 'ism-ideasci-modules'),
       'manage_options',
       'ideasci-main-menu',
-      array($this, 'render_main_page') // Callback to render the main page
+      [$this, 'render_main_page']
     );
 
     add_submenu_page(
@@ -35,47 +53,44 @@ class ISM_IdeaSciAdmin
       esc_html__('About', 'ism-ideasci-modules'),
       'manage_options',
       'ideasci-about',
-      array($this, 'render_about_page') // Callback to render the about page
+      [$this, 'render_about_page']
     );
 
-    add_submenu_page(
-      'ideasci-main-menu',
-      esc_html__('Extensions', 'ism-ideasci-modules'),
-      esc_html__('Extensions', 'ism-ideasci-modules'),
-      'manage_options',
-      'ideasci-extensions',
-      array($this, 'render_extensions_page') // Callback to render the extensions page
-    );
+    $this->register_menus();
+  }
+
+  private function register_menus()
+  {
+    foreach ($this->modules as $module) {
+      if (method_exists($module, 'register_menu')) {
+        $module->register_menu();
+      }
+    }
   }
 
   public function register_settings()
   {
-    // Register plugin settings
-    register_setting('ism_publications_settings', 'ism_publication_title');
-    register_setting('ism_publications_settings', 'ism_publication_type');
-    register_setting('ism_events_settings', 'enable_events_extension');
-    register_setting('ism_events_settings', 'event_name');
-    register_setting('ism_events_settings', 'participants_count');
+    $this->register_module_settings();
+  }
+
+  private function register_module_settings()
+  {
+    foreach ($this->modules as $module) {
+      if (method_exists($module, 'register_settings')) {
+        $module->register_settings();
+      }
+    }
   }
 
   public function render_main_page()
   {
-    // Render the main page content
-    require_once 'main-page.php';
+    require_once plugin_dir_path(__FILE__) . 'templates/main-page.php';
   }
 
   public function render_about_page()
   {
-    // Render the about page content
-    require_once 'about-page.php';
-  }
-
-  public function render_extensions_page()
-  {
-    // Render the extensions page content
-    require_once 'extensions/extensions-page.php';
+    require_once plugin_dir_path(__FILE__) . 'templates/about-page.php';
   }
 }
 
-// Initialize the ISM_IdeaSciAdmin class
 new ISM_IdeaSciAdmin();

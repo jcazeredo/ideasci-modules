@@ -82,7 +82,6 @@ if (!class_exists('ISM_Update')) {
 
     private function get_latest_release_metadata()
     {
-
       // Request github latest release
       $request_github = wp_remote_get(
         $this->github_url,
@@ -100,6 +99,11 @@ if (!class_exists('ISM_Update')) {
       }
 
       $response_github = json_decode(wp_remote_retrieve_body($request_github));
+
+      // Check if tag_name and zip_filename properties exist before using them
+      if (!isset($response_github->tag_name) || !isset($response_github->zip_filename)) {
+        return false;
+      }
 
       // Create the required URLs
       $base_url = $this->download_base_url . "/" . $response_github->tag_name . "/";
@@ -123,7 +127,12 @@ if (!class_exists('ISM_Update')) {
 
       $metadata = json_decode(wp_remote_retrieve_body($request_metadata));
 
-      $metadata->download_link = $base_url . $metadata->zip_filename;;
+      // Check if version property exists before using it
+      if (!isset($metadata->version)) {
+        return false;
+      }
+
+      $metadata->download_link = $base_url . $metadata->zip_filename;
 
       return $metadata;
     }

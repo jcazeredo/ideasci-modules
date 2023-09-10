@@ -132,7 +132,7 @@ if (isset($_POST['registration_flag'])) {
 
     <!-- Add more form fields as needed -->
     <div class="form-group">
-      <label for="terms_conditions" class="ism-events-form-required-field">
+      <label for="terms_conditions">
         <input type="checkbox" id="terms_conditions" name="terms_conditions">
         <?php esc_html_e('I agree to the terms and conditions', 'ism-ideasci-modules'); ?>
       </label>
@@ -154,7 +154,6 @@ if (isset($_POST['registration_flag'])) {
 </div>
 
 <script>
-  // registration-form.php
   jQuery(document).ready(function($) {
     jQuery("#registration_submit").click(function(e) {
       e.preventDefault();

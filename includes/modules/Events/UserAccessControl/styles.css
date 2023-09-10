@@ -63,3 +63,9 @@ input[type="submit"]:hover {
   font-size: 14px;
   margin-top: 5px;
 }
+
+/* Style required field labels with a red asterisk */
+.ism-events-form-required-field::after {
+  content: " *";
+  color: red;
+}

@@ -1,50 +1,75 @@
-// External Dependencies
 import React, { Component } from 'react';
-
+import './styles.css';
 
 class UserAccessControl extends Component {
-
   static slug = 'ism_events_uac';
 
-  _renderButton() {
-    const props              = this.props;
-    const utils              = window.ET_Builder.API.Utils;
-    const buttonTarget       = 'on' === props.url_new_window ? '_blank' : '';
-    const buttonIcon         = props.button_icon ? utils.processFontIcon(props.button_icon) : false;
-    const buttonClassName    = {
-      et_pb_button:             true,
-      et_pb_custom_button_icon: props.button_icon,
-    };
-
-    if (! props.button_text || ! props.button_url) {
-      return '';
-    }
-
-    return (
-      <div className='et_pb_button_wrapper'>
-        <a
-          className={utils.classnames(buttonClassName)}
-          href={props.button_url}
-          target={buttonTarget}
-          rel={utils.linkRel(props.button_rel)}
-          data-icon={buttonIcon}
-        >
-          {props.button_text}
-        </a>
-      </div>
-    );
-  }
-
-  /**
-   * Module render in VB
-   * Basically ISM_CTA_Has_VB_Support->render() equivalent in JSX
-   */
   render() {
+    const { registration_form_fields, registration_form_title } = this.props;
+
     return (
       <div>
-        <h2 className="ism-title">{this.props.title}</h2>
-        <div className="ism-content">{this.props.content()}</div>
-        {this._renderButton()}
+        <div className="ism-events-form-container">
+          <h2>{registration_form_title}</h2>
+          <form id="registration_form" className="ism-events-registration-form" method="post">
+            {/* Add your form nonce and hidden fields here */}
+            <input type="hidden" name="registration_flag" value="1" />
+
+            {/* Render form fields */}
+            <div className="form-group">
+              <label htmlFor="email" className="ism-events-form-required-field">Email</label>
+              <input type="email" id="email" name="email" required />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="confirm_email" className="ism-events-form-required-field">Confirm Email</label>
+              <input type="email" id="confirm_email" name="confirm_email" required />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="password" className="ism-events-form-required-field">Password</label>
+              <input type="password" id="password" name="password" required />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="confirm_password" className="ism-events-form-required-field">Confirm Password</label>
+              <input type="password" id="confirm_password" name="confirm_password" required />
+            </div>
+
+            {Object.keys(registration_form_fields).map(fieldSlug => {
+              const fieldInfo = registration_form_fields[fieldSlug];
+              const display = this.props[`display_${fieldSlug}`] === 'on';
+              const inputType = fieldInfo.type;
+              const required = this.props[`require_${fieldSlug}`] === 'on';
+                
+              return display ? (
+                <div className="form-group" key={fieldSlug}>
+                  <label htmlFor={fieldSlug} className={required ? 'ism-events-form-required-field' : ''}>
+                    {fieldInfo.label}
+                  </label>
+                  <input
+                    type={inputType}
+                    id={fieldSlug}
+                    name={fieldSlug}
+                    required={required}
+                  />
+                </div>
+              ) : null;
+            })}
+
+            {/* Additional form fields, e.g., terms and conditions */}
+            <div className="form-group">
+              <label htmlFor="terms_conditions" className='ism-events-form-required-field'>
+                <input type="checkbox" id="terms_conditions" name="terms_conditions" />
+                I agree to the terms and conditions
+              </label>
+            </div>
+
+            {/* Submit button */}
+            <input type="submit" name="registration_submit" id="registration_submit" value="Register" />
+          </form>
+        </div>
+        <div className="ism-events-form-message"></div>
       </div>
     );
   }
